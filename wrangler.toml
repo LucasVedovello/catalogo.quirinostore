@@ -1,0 +1,7 @@
+# Usado por `wrangler pages dev` / `wrangler pages deploy` (scripts preview/deploy).
+# No painel da Cloudflare Pages, configure também a flag "nodejs_compat" em
+# Settings → Functions → Compatibility flags (Production e Preview).
+name = "catalogo-quirinostore"
+compatibility_date = "2025-09-01"
+compatibility_flags = ["nodejs_compat"]
+pages_build_output_dir = ".vercel/output/static"
