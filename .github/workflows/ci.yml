@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    name: Lint, build e pages:build (Cloudflare)
+    name: Lint + build Cloudflare (OpenNext)
     runs-on: ubuntu-latest
     env:
       # Sem Supabase o build usa mock-data; o número é só para o link wa.me.
@@ -25,11 +25,12 @@ jobs:
 
       - run: npm run lint
 
-      # Mesmo comando configurado no painel da Cloudflare Pages.
-      # Roda `vercel build` (que executa `next build`) e converte a saída para Workers.
-      - run: npm run pages:build
+      # Mesmo comando configurado como "Build command" no painel da Cloudflare.
+      # Executa `next build` e gera .open-next/worker.js + .open-next/assets.
+      - run: npm run build:cloudflare
+
+      - name: Valida a configuração do Worker (sem publicar)
+        run: npx wrangler deploy --dry-run --outdir=.wrangler/dry-run
 
       - name: Resumo da saída
-        run: |
-          echo "Funções edge geradas:" && ls -R .vercel/output/static/_worker.js | head -40
-          du -sh .vercel/output/static
+        run: du -sh .open-next .open-next/assets .open-next/worker.js

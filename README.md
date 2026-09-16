@@ -2,7 +2,7 @@
 
 Catálogo de roupas streetwear **sem checkout**: o cliente navega, escolhe tamanho/cor, monta o carrinho e, ao finalizar, uma mensagem formatada é gerada e o WhatsApp do vendedor é aberto (`wa.me`). Pagamento e entrega são combinados na conversa.
 
-**Stack:** Next.js 15 (App Router) · TypeScript · Tailwind CSS v4 (CSS-first) · Supabase (Postgres + Auth + Storage) · Zustand (carrinho persistido) · Cloudflare Pages via `@cloudflare/next-on-pages`.
+**Stack:** Next.js 15 (App Router) · TypeScript · Tailwind CSS v4 (CSS-first) · Supabase (Postgres + Auth + Storage) · Zustand (carrinho persistido) · Cloudflare Workers via `@opennextjs/cloudflare`.
 
 ## Funcionalidades
 
@@ -62,24 +62,42 @@ RLS: leitura pública (produtos inativos só para autenticados), escrita apenas 
 | `npm run dev` | servidor de desenvolvimento |
 | `npm run build` | build de produção do Next |
 | `npm run lint` | ESLint |
-| `npm run pages:build` | gera a saída para Cloudflare Pages (`.vercel/output/static`) com `@cloudflare/next-on-pages` |
-| `npm run preview` | `pages:build` + `wrangler pages dev` (simula o Worker localmente) |
-| `npm run deploy` | `pages:build` + `wrangler pages deploy` |
+| `npm run build:cloudflare` | `next build` + empacota o Worker com `@opennextjs/cloudflare` (gera `.open-next/worker.js` e `.open-next/assets`) |
+| `npm run preview:cloudflare` | `build:cloudflare` + `wrangler dev` (roda o Worker localmente em http://localhost:8787) |
+| `npm run deploy:cloudflare` | `build:cloudflare` + `wrangler deploy` (publica na sua conta Cloudflare) |
 
-## Deploy na Cloudflare Pages
+## Deploy na Cloudflare (Workers)
 
-1. Conecte o repositório em **Workers & Pages → Create → Pages → Connect to Git**.
+O projeto usa o adaptador oficial [`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare). A configuração fica em:
+
+- `open-next.config.ts` — `defineCloudflareConfig({})`
+- `wrangler.jsonc` — `main: .open-next/worker.js`, `assets.directory: .open-next/assets`, `compatibility_flags: ["nodejs_compat", "global_fetch_strictly_public"]`
+
+### Pelo painel (Git integrado — recomendado)
+
+1. **Workers & Pages → Create → Workers → Import a repository** e selecione este repositório.
 2. Configurações de build:
-   - **Framework preset:** Next.js
-   - **Build command:** `npm run pages:build`
-   - **Build output directory:** `.vercel/output/static`
-3. Em **Settings → Environment variables**, cadastre as variáveis do `.env.local` (Production e Preview).
-4. Em **Settings → Functions → Compatibility flags**, adicione `nodejs_compat` (Production e Preview). Sem isso o Worker falha ao iniciar.
-5. Faça o deploy. As rotas da loja rodam no edge (`export const runtime = "edge"` em `src/app/(loja)/layout.tsx`), então o catálogo reflete o banco a cada request, sem rebuild.
+   - **Build command:** `npm run build:cloudflare`
+   - **Deploy command:** `npx wrangler deploy`
+   - **Root directory:** `/` (padrão)
+3. Em **Settings → Variables and Secrets**, cadastre as variáveis do `.env.local` (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_WHATSAPP_NUMBER`, `NEXT_PUBLIC_INSTAGRAM`) **também como variáveis de build** — elas são `NEXT_PUBLIC_*`, ou seja, embutidas no bundle durante o `next build`. Se só existirem em runtime, a loja sobe em modo mock.
+4. Cada push em `main` faz build + deploy.
 
-> **Windows:** o `pages:build` depende do `vercel build`, que não funciona de forma confiável no Windows (o próprio next-on-pages avisa; na prática ele falha ao mapear os caminhos das funções). Rode em Linux/macOS, WSL ou deixe o build para a Cloudflare/GitHub Actions — o workflow em `.github/workflows/ci.yml` executa `npm run pages:build` em Ubuntu a cada push.
+> Se o deploy falhar com o Worker "vazio" ou sem assets, confira se o **Build command** está preenchido: rodar só `npx wrangler deploy` sem o `npm run build:cloudflare` antes não gera o `.open-next/`.
 
-> **Versão do Next:** o projeto está fixado em `next@15.5.x` porque `@cloudflare/next-on-pages` não suporta o Next 16 (peer `<=15.5.2`; usamos o 15.5.25 pelos patches de segurança — o `.npmrc` tem `legacy-peer-deps=true` por isso). Se quiser migrar para o Next 16, o caminho é trocar para `@opennextjs/cloudflare`.
+### Pela linha de comando
+
+```bash
+npx wrangler login          # só na primeira vez — abre o navegador
+npm run deploy:cloudflare   # build + publish
+```
+
+Para testar o Worker localmente antes de publicar: `npm run preview:cloudflare`.
+
+> **Observações**
+> - As rotas da loja usam `export const dynamic = "force-dynamic"` (`src/app/(loja)/layout.tsx`), então o catálogo reflete o banco a cada request, sem rebuild. O OpenNext não suporta `runtime = "edge"` — todas as rotas rodam no runtime Node do Worker.
+> - O projeto usa `next@15.5.x`; o `@opennextjs/cloudflare` também suporta o Next 16 (`>=16.3.3`) caso queira atualizar.
+> - O workflow `.github/workflows/ci.yml` roda lint + `build:cloudflare` + `wrangler deploy --dry-run` a cada push, como verificação independente do painel.
 
 ## Estrutura
 
@@ -110,6 +128,8 @@ src/
 supabase/
   schema.sql      tabelas, RLS, storage
   seed.sql        produtos de exemplo
+open-next.config.ts   adaptador OpenNext (Cloudflare)
+wrangler.jsonc        configuração do Worker
 ```
 
 ## Design tokens

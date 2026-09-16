@@ -42,3 +42,7 @@ next-env.d.ts
 
 # manter o exemplo de env versionado
 !.env.example
+
+# OpenNext / Cloudflare
+/.open-next/
+/.wrangler/
