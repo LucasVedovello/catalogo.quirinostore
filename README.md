@@ -21,7 +21,7 @@ Catálogo de roupas streetwear **sem checkout**: o cliente navega, escolhe taman
 ## Rodando localmente
 
 ```bash
-npm install
+npm install                  # Node 22+
 cp .env.example .env.local   # edite os valores
 npm run dev                  # http://localhost:3000
 ```
@@ -80,6 +80,7 @@ O projeto usa o adaptador oficial [`@opennextjs/cloudflare`](https://opennext.js
    - **Build command:** `npm run build:cloudflare`
    - **Deploy command:** `npx wrangler deploy`
    - **Root directory:** `/` (padrão)
+   - **Node:** 22+ (o `wrangler@4` exige; o arquivo `.node-version` na raiz já define `22`, e você também pode setar a variável de build `NODE_VERSION=22`)
 3. Em **Settings → Variables and Secrets**, cadastre as variáveis do `.env.local` (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_WHATSAPP_NUMBER`, `NEXT_PUBLIC_INSTAGRAM`) **também como variáveis de build** — elas são `NEXT_PUBLIC_*`, ou seja, embutidas no bundle durante o `next build`. Se só existirem em runtime, a loja sobe em modo mock.
 4. Cada push em `main` faz build + deploy.
 
