@@ -5,6 +5,9 @@
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-09-15",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  // URL *.workers.dev e Preview URLs por versão (explícito para o wrangler não avisar a cada deploy)
+  "workers_dev": true,
+  "preview_urls": true,
   "assets": {
     "directory": ".open-next/assets",
     "binding": "ASSETS"
