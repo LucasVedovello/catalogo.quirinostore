@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, Search, ShoppingBag, X } from "lucide-react";
@@ -10,17 +11,31 @@ import { selectTotalItems, useCart } from "@/store/cart";
 import { SearchBar } from "@/components/catalog/search";
 import { MobileMenu } from "./mobile-menu";
 
+/** Marca da loja no Supabase Storage (bucket público). Arte branca sobre preto sólido, sem transparência. */
+const LOGO_URL =
+  "https://ojugabhswoypzmkhowoj.supabase.co/storage/v1/object/public/public.logo-quirino.png/public/logo-quirino.png";
+
 export function Logo({ className }: { className?: string }) {
   return (
     <Link
       href="/"
-      className={cn(
-        "font-display text-xl font-black uppercase leading-none tracking-tighter",
-        className,
-      )}
+      className={cn("flex shrink-0 items-center gap-2 sm:gap-2.5", className)}
       aria-label="Quirino Store — início"
     >
-      QUIRINO<span className="text-primary">.</span>STORE
+      {/* mix-blend-screen: o fundo preto do JPEG some sobre o header escuro e só o desenho branco fica. */}
+      <span className="relative block h-7 w-7 shrink-0 overflow-hidden sm:h-8 sm:w-8" aria-hidden>
+        <Image
+          src={LOGO_URL}
+          alt=""
+          fill
+          priority
+          sizes="32px"
+          className="scale-[1.08] object-cover mix-blend-screen"
+        />
+      </span>
+      <span className="font-display text-xl font-black uppercase leading-none tracking-tighter">
+        QUIRINO<span className="text-primary">.</span>STORE
+      </span>
     </Link>
   );
 }

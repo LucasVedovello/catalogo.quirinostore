@@ -114,8 +114,8 @@ export function HeroBannerManager() {
           Prévia
         </p>
         {ativas.length > 0 ? (
-          <div className="mx-auto max-w-md p-3">
-            <HeroBanner images={ativas} className="aspect-[4/5] sm:aspect-[16/10]" />
+          <div className="mx-auto max-w-xs p-4">
+            <HeroBanner images={ativas} className="aspect-[4/5]" />
           </div>
         ) : (
           <p className="px-3 py-3 text-xs text-muted">Nenhuma imagem ativa — a home usa a colagem de produtos.</p>

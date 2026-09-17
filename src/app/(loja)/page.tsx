@@ -32,7 +32,7 @@ export default async function HomePage() {
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:py-20">
           <div className="min-w-0 animate-slide-up">
             {settings.hero_eyebrow && (
-              <p className="font-display text-[11px] font-bold uppercase tracking-[0.3em] text-primary">
+              <p className="flex items-center gap-3 font-display text-[11px] font-bold uppercase tracking-[0.3em] text-primary before:hidden before:h-px before:w-6 before:shrink-0 before:bg-primary sm:before:block">
                 {settings.hero_eyebrow}
               </p>
             )}
@@ -68,7 +68,7 @@ export default async function HomePage() {
           {bannerImages.length > 0 && (
             <HeroBanner
               images={bannerImages}
-              className="aspect-[4/3] animate-fade-in sm:aspect-[16/9] lg:aspect-[4/5]"
+              className="aspect-square animate-fade-in sm:aspect-[4/3] lg:aspect-[4/5]"
             />
           )}
 

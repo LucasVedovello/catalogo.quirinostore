@@ -93,7 +93,7 @@ export function SiteSettingsForm() {
             <Field
               label="Título"
               htmlFor="hero-titulo"
-              hint="Use Enter para quebrar linhas. Com mais de uma linha, a última aparece só com contorno."
+              hint="Sem Enter, as palavras são distribuídas em 2–3 linhas automaticamente; use Enter para controlar as quebras. As linhas alternam entre preenchida e só contorno, e a última palavra fica azul."
             >
               <Textarea
                 id="hero-titulo"
@@ -134,7 +134,7 @@ export function SiteSettingsForm() {
             </p>
             <div className="overflow-hidden bg-grid px-5 py-8">
               {form.hero_eyebrow.trim() && (
-                <p className="font-display text-[11px] font-bold uppercase tracking-[0.3em] text-primary">
+                <p className="flex items-center gap-3 font-display text-[11px] font-bold uppercase tracking-[0.3em] text-primary before:hidden before:h-px before:w-6 before:shrink-0 before:bg-primary sm:before:block">
                   {form.hero_eyebrow}
                 </p>
               )}

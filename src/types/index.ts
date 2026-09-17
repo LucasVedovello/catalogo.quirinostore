@@ -65,7 +65,7 @@ export interface BannerImage {
 export interface SiteSettings {
   /** Frase pequena acima do título do hero (ex.: "Drop 09 · 2026 — Coleção nova no ar"). Vazio = não aparece. */
   hero_eyebrow: string;
-  /** Título do hero da home. Quebras de linha separam as linhas; a última fica contornada. */
+  /** Título do hero da home. Quebras de linha são respeitadas; sem elas, o texto é equilibrado em 2–3 linhas. */
   hero_titulo: string;
   /** Parágrafo abaixo do título do hero. Vazio = não aparece. */
   hero_subtitulo: string;
