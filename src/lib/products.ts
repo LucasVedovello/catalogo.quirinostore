@@ -1,5 +1,6 @@
 import type {
   Banner,
+  BannerImage,
   Category,
   HomeSections,
   Product,
@@ -7,9 +8,16 @@ import type {
   ProductSort,
   ProductTag,
   ProductVariant,
+  SiteSettings,
 } from "@/types";
 import { getSupabase, isSupabaseConfigured } from "./supabase";
-import { mockBanners, mockCategories, mockProducts } from "./mock-data";
+import {
+  defaultSiteSettings,
+  mockBannerImages,
+  mockBanners,
+  mockCategories,
+  mockProducts,
+} from "./mock-data";
 import { normalizeText, unique } from "./utils";
 
 /**
@@ -254,6 +262,45 @@ export async function getBanners(): Promise<Banner[]> {
     return [];
   }
   return data ?? [];
+}
+
+/** Imagens ativas do carrossel do hero, na ordem definida no admin. */
+export async function getBannerImages(): Promise<BannerImage[]> {
+  if (!isSupabaseConfigured) {
+    return mockBannerImages.filter((b) => b.ativo).sort((a, b) => a.ordem - b.ordem);
+  }
+
+  const { data, error } = await getSupabase()
+    .from("banner_images")
+    .select("*")
+    .eq("ativo", true)
+    .order("ordem", { ascending: true })
+    .order("criado_em", { ascending: true });
+
+  if (error) {
+    console.error("[products] erro ao buscar imagens do banner:", error.message);
+    return [];
+  }
+  return data ?? [];
+}
+
+/** Configurações gerais (linha única). Campos vazios/ausentes caem no padrão. */
+export async function getSiteSettings(): Promise<SiteSettings> {
+  if (!isSupabaseConfigured) return defaultSiteSettings;
+
+  const { data, error } = await getSupabase()
+    .from("site_settings")
+    .select("hero_titulo")
+    .eq("id", 1)
+    .maybeSingle();
+
+  if (error) {
+    console.error("[products] erro ao buscar configurações:", error.message);
+    return defaultSiteSettings;
+  }
+  return {
+    hero_titulo: data?.hero_titulo?.trim() || defaultSiteSettings.hero_titulo,
+  };
 }
 
 export async function getHomeSections(limit = 8): Promise<HomeSections> {

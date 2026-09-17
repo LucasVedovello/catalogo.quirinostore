@@ -1,4 +1,4 @@
-import type { Banner, Category, Product } from "@/types";
+import type { Banner, BannerImage, Category, Product, SiteSettings } from "@/types";
 import { getSupabase, STORAGE_BUCKET, storagePathFromPublicUrl } from "./supabase";
 import { normalizeProduct, PRODUCT_SELECT } from "./products";
 import { slugify } from "./utils";
@@ -173,7 +173,11 @@ export async function adminDeleteProduct(product: Product): Promise<void> {
 
 /* ---------- Storage ---------- */
 
-export async function uploadProductImage(file: File, folder: string): Promise<string> {
+/** Pasta do bucket usada pelas imagens do banner da home. */
+export const BANNER_FOLDER = "banner";
+
+/** Envia uma imagem para o bucket público e devolve a URL. `folder` vira uma pasta dentro do bucket. */
+export async function uploadImage(file: File, folder: string): Promise<string> {
   const sb = getSupabase();
   const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
   const safeFolder = slugify(folder) || "produto";
@@ -261,4 +265,87 @@ export async function adminSaveBanner(banner: Omit<Banner, "id"> & { id?: string
 export async function adminDeleteBanner(id: string): Promise<void> {
   const { error } = await getSupabase().from("banners").delete().eq("id", id);
   if (error) fail("Erro ao excluir banner", error);
+}
+
+/* ---------- Imagens do banner (hero da home) ---------- */
+
+export async function adminListBannerImages(): Promise<BannerImage[]> {
+  const { data, error } = await getSupabase()
+    .from("banner_images")
+    .select("*")
+    .order("ordem", { ascending: true })
+    .order("criado_em", { ascending: true });
+  if (error) fail("Erro ao listar imagens do banner", error);
+  return data ?? [];
+}
+
+export async function adminCreateBannerImage(url: string, ordem: number): Promise<BannerImage> {
+  const { data, error } = await getSupabase()
+    .from("banner_images")
+    .insert({ url, ordem, ativo: true })
+    .select()
+    .single();
+  if (error || !data) fail("Erro ao salvar imagem do banner", error);
+  return data as BannerImage;
+}
+
+export async function adminPatchBannerImage(
+  id: string,
+  patch: Partial<Pick<BannerImage, "ativo" | "ordem" | "titulo" | "link">>,
+): Promise<BannerImage> {
+  const payload = { ...patch };
+  if ("titulo" in payload) payload.titulo = payload.titulo?.trim() || null;
+  if ("link" in payload) payload.link = payload.link?.trim() || null;
+  const { data, error } = await getSupabase()
+    .from("banner_images")
+    .update(payload)
+    .eq("id", id)
+    .select()
+    .single();
+  if (error || !data) fail("Erro ao atualizar imagem do banner", error);
+  return data as BannerImage;
+}
+
+/** Persiste a ordem = posição na lista. Só grava as linhas cuja ordem mudou. */
+export async function adminReorderBannerImages(images: BannerImage[]): Promise<void> {
+  const sb = getSupabase();
+  for (const [index, img] of images.entries()) {
+    if (img.ordem === index) continue;
+    const { error } = await sb.from("banner_images").update({ ordem: index }).eq("id", img.id);
+    if (error) fail("Erro ao reordenar imagens do banner", error);
+  }
+}
+
+export async function adminDeleteBannerImage(image: BannerImage): Promise<void> {
+  const { error } = await getSupabase().from("banner_images").delete().eq("id", image.id);
+  if (error) fail("Erro ao remover imagem do banner", error);
+  await deleteStorageFiles([image.url]);
+}
+
+/* ---------- Configurações do site ---------- */
+
+export async function adminGetSiteSettings(): Promise<SiteSettings> {
+  const { data, error } = await getSupabase()
+    .from("site_settings")
+    .select("hero_titulo")
+    .eq("id", 1)
+    .maybeSingle();
+  if (error) fail("Erro ao carregar configurações", error);
+  return { hero_titulo: data?.hero_titulo ?? "" };
+}
+
+/** Linha única (id = 1): upsert cobre o caso de a linha inicial não existir. */
+export async function adminSaveSiteSettings(settings: SiteSettings): Promise<SiteSettings> {
+  const payload = {
+    id: 1,
+    hero_titulo: settings.hero_titulo.trim(),
+    atualizado_em: new Date().toISOString(),
+  };
+  const { data, error } = await getSupabase()
+    .from("site_settings")
+    .upsert(payload, { onConflict: "id" })
+    .select("hero_titulo")
+    .single();
+  if (error || !data) fail("Erro ao salvar configurações", error);
+  return data as SiteSettings;
 }

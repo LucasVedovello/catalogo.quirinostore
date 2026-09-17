@@ -96,16 +96,18 @@ export function Zoom({ src, alt, onClose, onPrev, onNext, counter }: ZoomProps) 
           if (t) track(t.clientX, t.clientY, e.currentTarget);
         }}
       >
-        <Image
-          src={src}
-          alt={alt}
-          fill
-          sizes="100vw"
-          priority
-          className="object-contain transition-transform duration-200 ease-out will-change-transform"
-          style={{ transform: zoomed ? `scale(${ZOOM_SCALE})` : "scale(1)", transformOrigin: origin }}
-          draggable={false}
-        />
+        <div className="absolute inset-0 animate-scale-in">
+          <Image
+            src={src}
+            alt={alt}
+            fill
+            sizes="100vw"
+            priority
+            className="object-contain transition-transform duration-200 ease-out will-change-transform"
+            style={{ transform: zoomed ? `scale(${ZOOM_SCALE})` : "scale(1)", transformOrigin: origin }}
+            draggable={false}
+          />
+        </div>
       </div>
 
       {(onPrev || onNext) && (

@@ -1,18 +1,29 @@
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, MessageCircle, RefreshCcw, Truck } from "lucide-react";
-import { getCategories, getHomeSections } from "@/lib/products";
+import { getBannerImages, getCategories, getHomeSections, getSiteSettings } from "@/lib/products";
 import { buildGenericContactLink } from "@/lib/whatsapp";
 import { cn } from "@/lib/utils";
 import { buttonVariants } from "@/components/ui/button";
 import { SectionHeading } from "@/components/ui/section-heading";
 import { ProductRow } from "@/components/catalog/product-grid";
+import { HeroBanner } from "@/components/home/hero-banner";
+import { HeroTitle } from "@/components/home/hero-title";
 
 export default async function HomePage() {
-  const [sections, categories] = await Promise.all([getHomeSections(), getCategories()]);
-  const heroProducts = [...sections.destaques, ...sections.maisVendidos, ...sections.novidades]
-    .filter((p, i, arr) => p.imagens[0] && arr.findIndex((x) => x.id === p.id) === i)
-    .slice(0, 3);
+  const [sections, categories, bannerImages, settings] = await Promise.all([
+    getHomeSections(),
+    getCategories(),
+    getBannerImages(),
+    getSiteSettings(),
+  ]);
+  // Sem imagem de banner cadastrada no admin, o hero mostra uma colagem dos produtos em destaque.
+  const heroProducts =
+    bannerImages.length > 0
+      ? []
+      : [...sections.destaques, ...sections.maisVendidos, ...sections.novidades]
+          .filter((p, i, arr) => p.imagens[0] && arr.findIndex((x) => x.id === p.id) === i)
+          .slice(0, 3);
 
   return (
     <>
@@ -23,13 +34,7 @@ export default async function HomePage() {
             <p className="font-display text-[11px] font-bold uppercase tracking-[0.3em] text-primary">
               Drop 09 · 2026 — Coleção nova no ar
             </p>
-            <h1 className="mt-4 break-words font-display text-[2.75rem] font-black uppercase leading-[0.88] tracking-tighter sm:text-6xl lg:text-7xl xl:text-[5.5rem]">
-              Street
-              <br />
-              wear
-              <br />
-              <span className="text-outline">sem enrolação.</span>
-            </h1>
+            <HeroTitle text={settings.hero_titulo} />
             <p className="mt-6 max-w-md text-base text-muted">
               Peças selecionadas, estoque real e pedido direto no WhatsApp. Escolha, monte o carrinho
               e a gente cuida do resto.
@@ -58,6 +63,13 @@ export default async function HomePage() {
               </li>
             </ul>
           </div>
+
+          {bannerImages.length > 0 && (
+            <HeroBanner
+              images={bannerImages}
+              className="aspect-[4/3] animate-fade-in sm:aspect-[16/9] lg:aspect-[4/5]"
+            />
+          )}
 
           {heroProducts.length > 0 && (
             <div className="grid grid-cols-3 gap-2 sm:gap-3 lg:grid-cols-2">

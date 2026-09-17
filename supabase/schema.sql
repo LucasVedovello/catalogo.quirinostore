@@ -59,6 +59,24 @@ create table if not exists public.banners (
   check (texto is not null or imagem is not null)
 );
 
+-- Imagens do banner/hero da home (carrossel). Arquivos no bucket product-images, pasta "banner/".
+create table if not exists public.banner_images (
+  id         uuid primary key default gen_random_uuid(),
+  url        text not null,
+  titulo     text,
+  link       text,
+  ativo      boolean not null default true,
+  ordem      integer not null default 0,
+  criado_em  timestamptz not null default now()
+);
+
+-- Configurações gerais do site: linha única (id = 1), uma coluna por configuração.
+create table if not exists public.site_settings (
+  id             integer primary key default 1 check (id = 1),
+  hero_titulo    text not null default 'Inspirado pelo medo de ser comum',
+  atualizado_em  timestamptz not null default now()
+);
+
 -- -----------------------------------------------------------------------------
 -- Índices
 -- -----------------------------------------------------------------------------
@@ -70,6 +88,7 @@ create index if not exists product_images_prod_idx  on public.product_images (pr
 create index if not exists product_variants_prod_idx on public.product_variants (product_id);
 create index if not exists categories_ordem_idx     on public.categories (ordem);
 create index if not exists banners_ativo_idx        on public.banners (ativo, ordem);
+create index if not exists banner_images_ativo_idx  on public.banner_images (ativo, ordem);
 
 -- -----------------------------------------------------------------------------
 -- RLS: leitura pública, escrita só para usuários autenticados (Supabase Auth).
@@ -81,6 +100,8 @@ alter table public.products         enable row level security;
 alter table public.product_images   enable row level security;
 alter table public.product_variants enable row level security;
 alter table public.banners          enable row level security;
+alter table public.banner_images    enable row level security;
+alter table public.site_settings    enable row level security;
 
 -- categories
 drop policy if exists "categories: leitura publica" on public.categories;
@@ -127,6 +148,24 @@ drop policy if exists "banners: escrita autenticada" on public.banners;
 create policy "banners: escrita autenticada" on public.banners
   for all to authenticated using (true) with check (true);
 
+-- banner_images
+drop policy if exists "banner_images: leitura publica" on public.banner_images;
+create policy "banner_images: leitura publica" on public.banner_images
+  for select using (true);
+
+drop policy if exists "banner_images: escrita autenticada" on public.banner_images;
+create policy "banner_images: escrita autenticada" on public.banner_images
+  for all to authenticated using (true) with check (true);
+
+-- site_settings
+drop policy if exists "site_settings: leitura publica" on public.site_settings;
+create policy "site_settings: leitura publica" on public.site_settings
+  for select using (true);
+
+drop policy if exists "site_settings: escrita autenticada" on public.site_settings;
+create policy "site_settings: escrita autenticada" on public.site_settings
+  for all to authenticated using (true) with check (true);
+
 -- -----------------------------------------------------------------------------
 -- Storage: bucket público "product-images"
 -- (leitura pública; upload/alteração/remoção só autenticado)
@@ -162,8 +201,12 @@ create policy "product-images: delete autenticado" on storage.objects
   for delete to authenticated using (bucket_id = 'product-images');
 
 -- -----------------------------------------------------------------------------
--- Dados iniciais (categorias e banners). Produtos de exemplo: ver seed.sql.
+-- Dados iniciais (categorias, banners e configurações). Produtos de exemplo: ver seed.sql.
 -- -----------------------------------------------------------------------------
+
+-- Linha única de configurações (os defaults da tabela preenchem os valores iniciais).
+insert into public.site_settings (id) values (1)
+on conflict (id) do nothing;
 
 insert into public.categories (nome, slug, ordem) values
   ('Camisetas', 'camisetas', 1),

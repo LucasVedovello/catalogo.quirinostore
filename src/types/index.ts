@@ -48,6 +48,25 @@ export interface Banner {
   ordem: number;
 }
 
+/** Imagem do carrossel do hero da home (tabela banner_images). */
+export interface BannerImage {
+  id: string;
+  url: string;
+  /** Texto alternativo/legenda (opcional). */
+  titulo: string | null;
+  /** Destino ao clicar na imagem (opcional): rota interna ou URL externa. */
+  link: string | null;
+  ativo: boolean;
+  ordem: number;
+  criado_em: string;
+}
+
+/** Configurações gerais do site — linha única na tabela site_settings. */
+export interface SiteSettings {
+  /** Título do hero da home. Quebras de linha separam as linhas; a última fica contornada. */
+  hero_titulo: string;
+}
+
 export interface CartItem {
   /** `${productId}:${variantId}` */
   id: string;

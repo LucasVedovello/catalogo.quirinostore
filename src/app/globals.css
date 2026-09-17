@@ -23,6 +23,7 @@
   --animate-marquee: marquee 32s linear infinite;
   --animate-fade-in: fade-in 0.2s ease-out both;
   --animate-slide-up: slide-up 0.25s ease-out both;
+  --animate-scale-in: scale-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 
 @keyframes marquee {
@@ -36,6 +37,12 @@
 @keyframes slide-up {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+/* Abertura de produto / modal: fade + leve scale. Fill "backwards" para o transform não
+   persistir depois da animação (um transform fixo viraria containing block de position: fixed). */
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 /* ---------- Base ---------- */
@@ -99,5 +106,10 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-marquee {
     animation: none;
+  }
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-scale-in {
+    animation-duration: 0.01ms;
   }
 }

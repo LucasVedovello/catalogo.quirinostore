@@ -8,14 +8,16 @@ Catálogo de roupas streetwear **sem checkout**: o cliente navega, escolhe taman
 
 - **Loja**
   - Header fixo com menu de categorias, busca instantânea (`?busca=`) e carrinho com contador
-  - Faixa marquee animada (banners cadastrados no admin)
-  - Home: hero, Mais Vendidos, Novidades, Promoções, Destaques
+  - Faixa marquee animada (avisos cadastrados no admin)
+  - Home: hero com título e carrossel de imagens editáveis no admin, Mais Vendidos, Novidades, Promoções, Destaques
   - `/produtos`: grid + filtros por categoria, tamanho, faixa de preço, seleção (promoção / mais vendidos / destaques) e ordenação — tudo via query params
   - `/produtos/[slug]`: galeria com zoom, seleção de tamanho e cor (com disponibilidade cruzada), quantidade limitada ao estoque da variante
   - Carrinho lateral: editar quantidade/remover, nome e telefone do cliente, botão **Finalizar pedido** que abre o WhatsApp com o resumo
 - **Admin** (`/admin`, login via Supabase Auth)
   - Produtos: CRUD, upload múltiplo de imagens para o bucket `product-images`, ordenação de fotos, grade de variantes (tamanho + cor + estoque), marcações de promoção/destaque/mais vendido, ativar/desativar
-  - Categorias e Banners
+  - Categorias e Avisos (frases da faixa marquee)
+  - Banner: imagens do carrossel do hero da home (upload para o Storage, ordem, ativar/desativar, link opcional)
+  - Configurações: texto do hero da home
 - **Funciona sem backend**: se as variáveis do Supabase não estiverem definidas, a loja usa os produtos de exemplo de `src/lib/mock-data.ts` (o admin fica indisponível).
 
 ## Rodando localmente
@@ -40,7 +42,8 @@ npm run dev                  # http://localhost:3000
 ## Configurando o Supabase
 
 1. Crie um projeto em [supabase.com](https://supabase.com).
-2. No **SQL Editor**, rode `supabase/schema.sql` (tabelas, índices, RLS, bucket `product-images` e dados iniciais de categorias/banners).
+2. No **SQL Editor**, rode `supabase/schema.sql` (tabelas, índices, RLS, bucket `product-images` e dados iniciais de categorias/banners/configurações).
+   - Banco criado antes das tabelas `banner_images`/`site_settings`? Rode só `supabase/migrations/20260917_banner_images_site_settings.sql` (ou o `schema.sql` inteiro — é idempotente).
 3. Opcional: rode `supabase/seed.sql` para carregar os mesmos produtos de exemplo do modo mock.
 4. Em **Authentication → Users**, crie o usuário do lojista (e-mail + senha). Não existe tabela própria de usuários: qualquer usuário autenticado é admin.
 5. Copie URL e `anon key` para `.env.local`.
@@ -51,7 +54,9 @@ Modelo de dados (resumo):
 - `products` — id, slug, nome, descricao, categoria_id, marca, preco, preco_promocional, eh_promocao, eh_destaque, eh_mais_vendido, ativo, criado_em
 - `product_images` — id, product_id, url, ordem
 - `product_variants` — id, product_id, tamanho, cor, **estoque** (o estoque é por variante, não por produto)
-- `banners` — id, texto, imagem, ativo, ordem
+- `banners` — id, texto, imagem, ativo, ordem (frases da faixa marquee — "Avisos" no admin)
+- `banner_images` — id, url, titulo, link, ativo, ordem, criado_em (carrossel do hero da home; arquivos em `product-images/banner/`)
+- `site_settings` — linha única (`id = 1`): hero_titulo, atualizado_em
 
 RLS: leitura pública (produtos inativos só para autenticados), escrita apenas para `authenticated`. O bucket é público para leitura; upload/remoção exigem login.
 
@@ -109,13 +114,15 @@ src/
       produtos/             grid com filtros
       produtos/[slug]/      página do produto
     admin/login/            login (Supabase Auth)
-    admin/(protected)/      produtos, produtos/novo, produtos/[id], categorias, banners
+    admin/(protected)/      produtos, produtos/novo, produtos/[id], categorias, banner, banners (avisos), configuracoes
   components/
     layout/   header, marquee, mobile-menu, footer
     catalog/  search, filters, product-card, product-grid
     product/  gallery, zoom, size-selector, color-selector, add-to-cart
     cart/     drawer, cart-hydration
-    admin/    admin-guard, admin-shell, product-table, product-form, image-uploader, variant-editor, category-manager, banner-manager
+    home/     hero-banner (carrossel), hero-title
+    admin/    admin-guard, admin-shell, product-table, product-form, image-dropzone, image-uploader, variant-editor,
+              category-manager, banner-manager (avisos), hero-banner-manager, site-settings-form
     ui/       button, input, badge, price, quantity-stepper, section-heading
   lib/
     supabase.ts   client + flag isSupabaseConfigured
@@ -129,6 +136,7 @@ src/
 supabase/
   schema.sql      tabelas, RLS, storage
   seed.sql        produtos de exemplo
+  migrations/     SQL incremental para bancos já existentes
 open-next.config.ts   adaptador OpenNext (Cloudflare)
 wrangler.jsonc        configuração do Worker
 ```

@@ -70,7 +70,8 @@ export default async function ProdutoPage({ params }: ProdutoPageProps) {
         <span className="truncate text-foreground">{product.nome}</span>
       </nav>
 
-      <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
+      {/* key={product.id}: remonta (e reanima) ao navegar entre produtos relacionados. */}
+      <div key={product.id} className="grid gap-8 animate-scale-in lg:grid-cols-2 lg:gap-12">
         <Gallery
           images={product.imagens}
           alt={product.nome}

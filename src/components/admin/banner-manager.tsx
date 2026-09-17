@@ -81,7 +81,7 @@ export function BannerManager() {
   return (
     <>
       <AdminPageHeader
-        title="Banners"
+        title="Avisos"
         description="Frases da faixa animada no topo da loja (frete grátis, promoções, drops)."
       />
       <ErrorBanner message={error} onDismiss={() => setError(null)} />

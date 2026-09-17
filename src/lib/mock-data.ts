@@ -1,4 +1,12 @@
-import type { Banner, Category, Product, ProductImage, ProductVariant } from "@/types";
+import type {
+  Banner,
+  BannerImage,
+  Category,
+  Product,
+  ProductImage,
+  ProductVariant,
+  SiteSettings,
+} from "@/types";
 
 /**
  * Dados de exemplo usados quando o Supabase não está configurado.
@@ -23,6 +31,41 @@ export const mockBanners: Banner[] = [
   { id: "ban-3", texto: "Até 30% OFF em peças selecionadas", imagem: null, ativo: true, ordem: 3 },
   { id: "ban-4", texto: "Novo drop toda sexta", imagem: null, ativo: true, ordem: 4 },
 ];
+
+export const mockBannerImages: BannerImage[] = [
+  {
+    id: "hero-1",
+    url: img("1523381210434-271e8be1f52b"),
+    titulo: "Novo drop",
+    link: "/produtos?ordenar=recentes",
+    ativo: true,
+    ordem: 1,
+    criado_em: "2026-09-01T12:00:00Z",
+  },
+  {
+    id: "hero-2",
+    url: img("1552346154-21d32810aba3"),
+    titulo: "Promoções",
+    link: "/produtos?tag=promocao",
+    ativo: true,
+    ordem: 2,
+    criado_em: "2026-09-01T12:00:00Z",
+  },
+  {
+    id: "hero-3",
+    url: img("1591047139829-d91aecb6caea"),
+    titulo: "Mais vendidos",
+    link: "/produtos?tag=mais-vendidos",
+    ativo: true,
+    ordem: 3,
+    criado_em: "2026-09-01T12:00:00Z",
+  },
+];
+
+/** Valores padrão das configurações — também usados como fallback se a tabela estiver vazia. */
+export const defaultSiteSettings: SiteSettings = {
+  hero_titulo: "Inspirado pelo medo de ser comum",
+};
 
 const catById = Object.fromEntries(mockCategories.map((c) => [c.id, c]));
 

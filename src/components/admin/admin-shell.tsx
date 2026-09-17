@@ -9,7 +9,9 @@ import { useAdminSession } from "./admin-guard";
 const NAV = [
   { href: "/admin/produtos", label: "Produtos" },
   { href: "/admin/categorias", label: "Categorias" },
-  { href: "/admin/banners", label: "Banners" },
+  { href: "/admin/banner", label: "Banner" },
+  { href: "/admin/banners", label: "Avisos" },
+  { href: "/admin/configuracoes", label: "Configurações" },
 ];
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
@@ -26,7 +28,8 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
 
           <nav className="ml-2 flex items-center gap-1 overflow-x-auto scrollbar-hide">
             {NAV.map((item) => {
-              const active = pathname.startsWith(item.href);
+              // Comparação por segmento: "/admin/banner" não pode marcar "/admin/banners".
+              const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
               return (
                 <Link
                   key={item.href}
