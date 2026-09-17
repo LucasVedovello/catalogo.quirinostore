@@ -284,13 +284,16 @@ export async function getBannerImages(): Promise<BannerImage[]> {
   return data ?? [];
 }
 
-/** Configurações gerais (linha única). Campos vazios/ausentes caem no padrão. */
+/** Colunas de site_settings lidas pela loja e pelo admin. */
+export const SITE_SETTINGS_SELECT = "hero_eyebrow, hero_titulo, hero_subtitulo";
+
+/** Configurações gerais (linha única). Linha ausente ou título vazio caem no padrão. */
 export async function getSiteSettings(): Promise<SiteSettings> {
   if (!isSupabaseConfigured) return defaultSiteSettings;
 
   const { data, error } = await getSupabase()
     .from("site_settings")
-    .select("hero_titulo")
+    .select(SITE_SETTINGS_SELECT)
     .eq("id", 1)
     .maybeSingle();
 
@@ -298,8 +301,11 @@ export async function getSiteSettings(): Promise<SiteSettings> {
     console.error("[products] erro ao buscar configurações:", error.message);
     return defaultSiteSettings;
   }
+  // Eyebrow e subtítulo podem ser esvaziados de propósito (somem da home); só o título tem fallback.
   return {
+    hero_eyebrow: data?.hero_eyebrow?.trim() ?? defaultSiteSettings.hero_eyebrow,
     hero_titulo: data?.hero_titulo?.trim() || defaultSiteSettings.hero_titulo,
+    hero_subtitulo: data?.hero_subtitulo?.trim() ?? defaultSiteSettings.hero_subtitulo,
   };
 }
 

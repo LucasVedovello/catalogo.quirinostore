@@ -63,8 +63,12 @@ export interface BannerImage {
 
 /** Configurações gerais do site — linha única na tabela site_settings. */
 export interface SiteSettings {
+  /** Frase pequena acima do título do hero (ex.: "Drop 09 · 2026 — Coleção nova no ar"). Vazio = não aparece. */
+  hero_eyebrow: string;
   /** Título do hero da home. Quebras de linha separam as linhas; a última fica contornada. */
   hero_titulo: string;
+  /** Parágrafo abaixo do título do hero. Vazio = não aparece. */
+  hero_subtitulo: string;
 }
 
 export interface CartItem {

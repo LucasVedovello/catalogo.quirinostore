@@ -64,7 +64,10 @@ export const mockBannerImages: BannerImage[] = [
 
 /** Valores padrão das configurações — também usados como fallback se a tabela estiver vazia. */
 export const defaultSiteSettings: SiteSettings = {
+  hero_eyebrow: "Drop 09 · 2026 — Coleção nova no ar",
   hero_titulo: "Inspirado pelo medo de ser comum",
+  hero_subtitulo:
+    "Peças selecionadas, estoque real e pedido direto no WhatsApp. Escolha, monte o carrinho e a gente cuida do resto.",
 };
 
 const catById = Object.fromEntries(mockCategories.map((c) => [c.id, c]));

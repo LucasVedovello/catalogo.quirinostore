@@ -17,7 +17,7 @@ Catálogo de roupas streetwear **sem checkout**: o cliente navega, escolhe taman
   - Produtos: CRUD, upload múltiplo de imagens para o bucket `product-images`, ordenação de fotos, grade de variantes (tamanho + cor + estoque), marcações de promoção/destaque/mais vendido, ativar/desativar
   - Categorias e Avisos (frases da faixa marquee)
   - Banner: imagens do carrossel do hero da home (upload para o Storage, ordem, ativar/desativar, link opcional)
-  - Configurações: texto do hero da home
+  - Configurações: textos do hero da home (frase de abertura, título e subtítulo)
 - **Funciona sem backend**: se as variáveis do Supabase não estiverem definidas, a loja usa os produtos de exemplo de `src/lib/mock-data.ts` (o admin fica indisponível).
 
 ## Rodando localmente
@@ -43,7 +43,7 @@ npm run dev                  # http://localhost:3000
 
 1. Crie um projeto em [supabase.com](https://supabase.com).
 2. No **SQL Editor**, rode `supabase/schema.sql` (tabelas, índices, RLS, bucket `product-images` e dados iniciais de categorias/banners/configurações).
-   - Banco criado antes das tabelas `banner_images`/`site_settings`? Rode só `supabase/migrations/20260917_banner_images_site_settings.sql` (ou o `schema.sql` inteiro — é idempotente).
+   - Banco já existente? Rode os arquivos de `supabase/migrations/` que ainda faltam, em ordem (ou o `schema.sql` inteiro — é idempotente).
 3. Opcional: rode `supabase/seed.sql` para carregar os mesmos produtos de exemplo do modo mock.
 4. Em **Authentication → Users**, crie o usuário do lojista (e-mail + senha). Não existe tabela própria de usuários: qualquer usuário autenticado é admin.
 5. Copie URL e `anon key` para `.env.local`.
@@ -56,7 +56,7 @@ Modelo de dados (resumo):
 - `product_variants` — id, product_id, tamanho, cor, **estoque** (o estoque é por variante, não por produto)
 - `banners` — id, texto, imagem, ativo, ordem (frases da faixa marquee — "Avisos" no admin)
 - `banner_images` — id, url, titulo, link, ativo, ordem, criado_em (carrossel do hero da home; arquivos em `product-images/banner/`)
-- `site_settings` — linha única (`id = 1`): hero_titulo, atualizado_em
+- `site_settings` — linha única (`id = 1`): hero_eyebrow, hero_titulo, hero_subtitulo, atualizado_em
 
 RLS: leitura pública (produtos inativos só para autenticados), escrita apenas para `authenticated`. O bucket é público para leitura; upload/remoção exigem login.
 

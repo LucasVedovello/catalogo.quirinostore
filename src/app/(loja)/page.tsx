@@ -31,14 +31,15 @@ export default async function HomePage() {
       <section className="relative overflow-hidden border-b border-border bg-grid">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:py-20">
           <div className="min-w-0 animate-slide-up">
-            <p className="font-display text-[11px] font-bold uppercase tracking-[0.3em] text-primary">
-              Drop 09 · 2026 — Coleção nova no ar
-            </p>
+            {settings.hero_eyebrow && (
+              <p className="font-display text-[11px] font-bold uppercase tracking-[0.3em] text-primary">
+                {settings.hero_eyebrow}
+              </p>
+            )}
             <HeroTitle text={settings.hero_titulo} />
-            <p className="mt-6 max-w-md text-base text-muted">
-              Peças selecionadas, estoque real e pedido direto no WhatsApp. Escolha, monte o carrinho
-              e a gente cuida do resto.
-            </p>
+            {settings.hero_subtitulo && (
+              <p className="mt-6 max-w-md whitespace-pre-line text-base text-muted">{settings.hero_subtitulo}</p>
+            )}
             <div className="mt-8 flex flex-wrap gap-3">
               <Link href="/produtos" className={buttonVariants({ variant: "primary", size: "lg" })}>
                 Ver catálogo <ArrowRight className="h-4 w-4" />

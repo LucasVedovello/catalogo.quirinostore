@@ -72,10 +72,17 @@ create table if not exists public.banner_images (
 
 -- Configurações gerais do site: linha única (id = 1), uma coluna por configuração.
 create table if not exists public.site_settings (
-  id             integer primary key default 1 check (id = 1),
-  hero_titulo    text not null default 'Inspirado pelo medo de ser comum',
-  atualizado_em  timestamptz not null default now()
+  id              integer primary key default 1 check (id = 1),
+  hero_titulo     text not null default 'Inspirado pelo medo de ser comum',
+  hero_eyebrow    text not null default 'Drop 09 · 2026 — Coleção nova no ar',
+  hero_subtitulo  text not null default 'Peças selecionadas, estoque real e pedido direto no WhatsApp. Escolha, monte o carrinho e a gente cuida do resto.',
+  atualizado_em   timestamptz not null default now()
 );
+-- Colunas adicionadas depois da criação da tabela (bancos antigos): o "create if not exists" acima não as inclui.
+alter table public.site_settings
+  add column if not exists hero_eyebrow text not null default 'Drop 09 · 2026 — Coleção nova no ar';
+alter table public.site_settings
+  add column if not exists hero_subtitulo text not null default 'Peças selecionadas, estoque real e pedido direto no WhatsApp. Escolha, monte o carrinho e a gente cuida do resto.';
 
 -- -----------------------------------------------------------------------------
 -- Índices

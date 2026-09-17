@@ -1,6 +1,6 @@
 import type { Banner, BannerImage, Category, Product, SiteSettings } from "@/types";
 import { getSupabase, STORAGE_BUCKET, storagePathFromPublicUrl } from "./supabase";
-import { normalizeProduct, PRODUCT_SELECT } from "./products";
+import { normalizeProduct, PRODUCT_SELECT, SITE_SETTINGS_SELECT } from "./products";
 import { slugify } from "./utils";
 
 /**
@@ -327,24 +327,30 @@ export async function adminDeleteBannerImage(image: BannerImage): Promise<void> 
 export async function adminGetSiteSettings(): Promise<SiteSettings> {
   const { data, error } = await getSupabase()
     .from("site_settings")
-    .select("hero_titulo")
+    .select(SITE_SETTINGS_SELECT)
     .eq("id", 1)
     .maybeSingle();
   if (error) fail("Erro ao carregar configurações", error);
-  return { hero_titulo: data?.hero_titulo ?? "" };
+  return {
+    hero_eyebrow: data?.hero_eyebrow ?? "",
+    hero_titulo: data?.hero_titulo ?? "",
+    hero_subtitulo: data?.hero_subtitulo ?? "",
+  };
 }
 
 /** Linha única (id = 1): upsert cobre o caso de a linha inicial não existir. */
 export async function adminSaveSiteSettings(settings: SiteSettings): Promise<SiteSettings> {
   const payload = {
     id: 1,
+    hero_eyebrow: settings.hero_eyebrow.trim(),
     hero_titulo: settings.hero_titulo.trim(),
+    hero_subtitulo: settings.hero_subtitulo.trim(),
     atualizado_em: new Date().toISOString(),
   };
   const { data, error } = await getSupabase()
     .from("site_settings")
     .upsert(payload, { onConflict: "id" })
-    .select("hero_titulo")
+    .select(SITE_SETTINGS_SELECT)
     .single();
   if (error || !data) fail("Erro ao salvar configurações", error);
   return data as SiteSettings;
